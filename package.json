@@ -9,7 +9,8 @@
   },
   "scripts": {
     "dev": "nodemon src/server.js",
-    "db:deploy": "npx prisma migrate deploy"
+    "db:deploy": "npx prisma migrate deploy",
+    "start": "node src/server.js"
   },
   "keywords": [],
   "author": "OLi-Byte",
