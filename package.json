@@ -4,8 +4,12 @@
   "description": "",
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": "22"
+  },
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "db:deploy": "npx prisma migrate deploy"
   },
   "keywords": [],
   "author": "OLi-Byte",
