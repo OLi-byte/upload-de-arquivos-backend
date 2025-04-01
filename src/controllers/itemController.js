@@ -5,31 +5,53 @@ import {
   getItemById,
   deleteItem,
 } from "../services/itemService.js";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 export async function createItemController(req, res) {
   const { title, description } = req.body;
   const image = req.file;
 
   try {
-    if (!title || !description || !image || image.length === 0) {
+    if (!title || !description || !image) {
       return res.status(400).json({
         message: "Todos os campos são obrigatórios",
       });
     }
 
-    const imageUrl = `/uploads/${image.filename}`;
+    const fileBuffer = image.buffer;
+    const fileName = `${Date.now()}_${image.originalname}`;
 
-    console.log("Imagem enviada:", image);
-    console.log("Caminho da imagem:", imageUrl);
+    const { data, error } = await supabase.storage
+      .from("images")
+      .upload(fileName, fileBuffer, {
+        contentType: image.mimetype,
+      });
 
-    const newItem = await createItem(title, description, imageUrl);
+    if (error) {
+      return res.status(400).json({
+        error: `Houve um problema ao realizar o upload de imagem: ${error.message}`,
+      });
+    }
+
+    const publicUrl = supabase.storage.from("images").getPublicUrl(fileName);
+
+    const newItem = await createItem(
+      title,
+      description,
+      publicUrl.data.publicUrl
+    );
 
     res.status(201).json({
       message: "O novo item foi adicionado com sucesso",
       item: newItem,
     });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     res.status(500).json({
       message: "Houve um erro ao adicionar o novo item",
       error: error.message,
